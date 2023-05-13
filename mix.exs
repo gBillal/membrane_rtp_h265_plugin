@@ -1,12 +1,12 @@
-defmodule Membrane.Template.Mixfile do
+defmodule Membrane.RTP.H265.Mixfile do
   use Mix.Project
 
   @version "0.1.0"
-  @github_url "https://github.com/membraneframework/membrane_template_plugin"
+  @github_url "https://github.com/membraneframework/membrane_rtp_h265_plugin"
 
   def project do
     [
-      app: :membrane_template_plugin,
+      app: :membrane_rtp_h265_plugin,
       version: @version,
       elixir: "~> 1.13",
       elixirc_paths: elixirc_paths(Mix.env()),
@@ -15,11 +15,11 @@ defmodule Membrane.Template.Mixfile do
       dialyzer: dialyzer(),
 
       # hex
-      description: "Template Plugin for Membrane Multimedia Framework",
+      description: "Membrane RTP payloader and depayloader for H265",
       package: package(),
 
       # docs
-      name: "Membrane Template plugin",
+      name: "Membrane RTP H265 Plugin",
       source_url: @github_url,
       docs: docs()
     ]
@@ -36,7 +36,10 @@ defmodule Membrane.Template.Mixfile do
 
   defp deps do
     [
-      {:membrane_core, "~> 0.10.0"},
+      {:membrane_core, "~> 0.11.0"},
+      {:membrane_rtp_format, "~> 0.6.0"},
+      {:membrane_h265_format, github: "gBillal/membrane_h265_format", tag: "v0.1.0"},
+      # Dev
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:dialyxir, ">= 0.0.0", only: :dev, runtime: false},
       {:credo, ">= 0.0.0", only: :dev, runtime: false}

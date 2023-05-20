@@ -44,7 +44,7 @@ defmodule Membrane.RTP.H265.FU.Header do
   """
   @spec parse(data :: binary()) :: {:error, :packet_malformed} | {:ok, {t(), nal :: binary()}}
   def parse(<<start::1, finish::1, nal_type::6, rest::binary>>)
-      when nal_type in 0..47 and valid_frame_boundary(start, finish) do
+      when nal_type in 0..63 and valid_frame_boundary(start, finish) do
     header = %__MODULE__{
       start_bit: start == 1,
       end_bit: finish == 1,

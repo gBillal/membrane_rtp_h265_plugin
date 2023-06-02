@@ -10,9 +10,7 @@ It is part of [Membrane Multimedia Framework](https://membraneframework.org).
 
 ## Supported packetization modes
 
-This package currently does not support `PACI` carrying RTP packet and does support the other types of packetization (Single NALU, Fragmentation Unit and Aggregation Packets).
-
-Also it does not support `DONL` and `DOND`, this extra data are added to the packets when the `sprop-max-don-diff` is present and greater than 0. `sprop-max-don-diff` is transmitted out of band such as in `SDP` description when using RTSP.  
+This package currently does not only support `PACI` carrying RTP packet and support the other types of packetization modes (Single NALU, Fragmentation Unit and Aggregation Packets).
 
 Please refer to [RFC 7798](https://tools.ietf.org/html/rfc7798) for details.
 

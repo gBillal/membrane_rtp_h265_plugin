@@ -10,7 +10,12 @@ It is part of [Membrane Multimedia Framework](https://membraneframework.org).
 
 ## Supported packetization modes
 
-This package currently does not only support `PACI` carrying RTP packet and support the other types of packetization modes (Single NALU, Fragmentation Unit and Aggregation Packets).
+This package does support the following (de)packetization modes:
+  * Single NALu
+  * Fragmentation Unit
+  * Aggregation Packets
+
+It does not support `PACI` packets.
 
 Please refer to [RFC 7798](https://tools.ietf.org/html/rfc7798) for details.
 

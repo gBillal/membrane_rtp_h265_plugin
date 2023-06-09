@@ -19,14 +19,14 @@ defmodule Membrane.RTP.H265.NAL.Header do
   @type type :: 0..63
 
   @typedoc """
-  Required to be 0 in HEVC, may be used in future extensions.
+  Required to be 0 in first version of HEVC, may be used in future extensions.
   """
   @type nuh_layer_id :: 0
 
   @typedoc """
-  Specifies the temporal identifier of the NAL unit plus 1.
+  Specifies the temporal sub-layer identifier of the NAL unit plus 1.
   """
-  @type nuh_temporal_id_plus1 :: 1..8
+  @type nuh_temporal_id_plus1 :: 1..7
 
   @type supported_types :: :ap | :fu | :single_nalu
   @type unsupported_types :: :paci

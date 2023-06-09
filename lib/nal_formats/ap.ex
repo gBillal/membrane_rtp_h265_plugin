@@ -1,6 +1,6 @@
 defmodule Membrane.RTP.H265.AP do
   @moduledoc """
-  Module responsible for parsing Agregation Packets.
+  Module responsible for parsing Aggregation Packets.
 
   Documented in [RFC7798](https://tools.ietf.org/html/rfc7798#page-28)
 

@@ -38,7 +38,7 @@ defmodule Membrane.RTP.H265.Mixfile do
     [
       {:membrane_core, "~> 0.11.0"},
       {:membrane_rtp_format, "~> 0.6.0"},
-      {:membrane_h265_format, github: "gBillal/membrane_h265_format", tag: "v0.1.0"},
+      {:membrane_h265_format, "~> 0.1.0"},
       # Dev
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:dialyxir, ">= 0.0.0", only: :dev, runtime: false},
@@ -61,7 +61,7 @@ defmodule Membrane.RTP.H265.Mixfile do
 
   defp package do
     [
-      maintainers: ["Membrane Team"],
+      maintainers: ["Billal Ghilas"],
       licenses: ["Apache-2.0"],
       links: %{
         "GitHub" => @github_url,
@@ -76,7 +76,7 @@ defmodule Membrane.RTP.H265.Mixfile do
       extras: ["README.md", "LICENSE"],
       formatters: ["html"],
       source_ref: "v#{@version}",
-      nest_modules_by_prefix: [Membrane.Template]
+      nest_modules_by_prefix: [Membrane.RTP.H265]
     ]
   end
 end

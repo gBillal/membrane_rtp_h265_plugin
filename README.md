@@ -6,8 +6,6 @@
 
 RTP payloader and depayloader for H265.
 
-It is part of [Membrane Multimedia Framework](https://membraneframework.org).
-
 ## Supported packetization modes
 
 This package does support the following (de)packetization modes:
@@ -18,7 +16,6 @@ This package does support the following (de)packetization modes:
 It does not support `PACI` packets.
 
 Please refer to [RFC 7798](https://tools.ietf.org/html/rfc7798) for details.
-
 
 
 ## Installation

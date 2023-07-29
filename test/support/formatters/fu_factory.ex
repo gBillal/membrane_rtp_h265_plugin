@@ -22,6 +22,11 @@ defmodule Membrane.Support.Formatters.FUFactory do
   @spec last() :: binary()
   def last, do: get_fixture(@max_fixtures)
 
+  @spec add_donl_field(binary(), non_neg_integer()) :: binary()
+  def add_donl_field(<<headers::8, rest::binary>>, don) do
+    <<headers::8, don::16, rest::binary>>
+  end
+
   @spec precede_with_fu_nal_header(binary()) :: binary
   def precede_with_fu_nal_header(data) when is_binary(data),
     do: <<0::1, 49::6, 0::6, 1::3>> <> data

@@ -85,7 +85,7 @@ defmodule Membrane.RTP.H265.AP do
   end
 
   defp do_parse(<<dond::8, size::16, nalu::binary-size(size), rest::binary>>, last_don, acc) do
-    don = last_don + dond
+    don = rem(last_don + dond + 1, 65_536)
     do_parse(rest, don, [{nalu, don} | acc])
   end
 

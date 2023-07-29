@@ -83,7 +83,7 @@ defmodule Membrane.RTP.H265.PayloaderPipelineTest do
       type = NAL.Header.encode_type(:ap)
       assert <<0::1, ^type::6, 0::6, 0::3, rest::binary>> = data
       assert {:ok, glued} = AP.parse(rest)
-      assert glued == List.duplicate(single_unit, number_of_packets)
+      assert Enum.map(glued, &elem(&1, 0)) == List.duplicate(single_unit, number_of_packets)
 
       Membrane.Pipeline.terminate(pid, blocking?: true)
     end

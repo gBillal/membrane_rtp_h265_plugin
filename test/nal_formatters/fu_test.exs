@@ -29,7 +29,25 @@ defmodule Membrane.RTP.H265.FUTest do
         end)
 
       expected_result = FUFactory.glued_fixtures() ~> (<<_header::16, rest::binary>> -> rest)
-      assert result == {expected_result, 19}
+      assert result == {expected_result, 19, nil}
+    end
+
+    test "parses packet with donl field" do
+      don = :rand.uniform(10_000)
+
+      [first_fixture | rest] = FUFactory.get_all_fixtures()
+      fixtures = [FUFactory.add_donl_field(first_fixture, don) | rest]
+
+      result =
+        fixtures
+        |> Enum.zip(1..Enum.count(fixtures))
+        |> Enum.reduce(%FU{donl?: true}, fn {elem, seq_num}, acc ->
+          FU.parse(elem, seq_num, acc)
+          ~> ({_command, value} -> value)
+        end)
+
+      expected_result = FUFactory.glued_fixtures() ~> (<<_header::16, rest::binary>> -> rest)
+      assert result == {expected_result, 19, don}
     end
 
     test "returns error when one of non edge packets dropped" do

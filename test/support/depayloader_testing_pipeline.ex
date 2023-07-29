@@ -7,7 +7,7 @@ defmodule Membrane.Support.DepayloaderTestingPipeline do
   alias Membrane.{RTP, Testing}
   alias Testing.Pipeline
 
-  @spec start_pipeline(any()) :: :ignore | {:error, any()} | {:ok, pid(), pid()}
+  @spec start_pipeline(any()) :: pid()
   def start_pipeline(data) do
     structure = [
       child(:source, %Testing.Source{output: data, stream_format: %RTP{}})

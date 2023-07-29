@@ -1,4 +1,6 @@
 defmodule Membrane.RTP.H265.DepayloaderPipelineTest do
+  @moduledoc false
+
   use ExUnit.Case
 
   import Membrane.Testing.Assertions
@@ -9,7 +11,7 @@ defmodule Membrane.RTP.H265.DepayloaderPipelineTest do
   alias Membrane.Testing.Source
 
   describe "Depayloader in a pipeline" do
-    test "does not crash when parsing staps" do
+    test "does not crash when parsing AP" do
       pid =
         APFactory.sample_data()
         |> Enum.chunk_every(2)

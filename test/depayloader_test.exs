@@ -9,9 +9,10 @@ defmodule Membrane.RTP.H265.DepayloaderTest do
   alias Membrane.Support.Formatters.{APFactory, FUFactory, RBSPNaluFactory}
 
   @empty_state %Depayloader.State{}
+  @don_state %Depayloader.State{sprop_max_don_diff: 1}
 
   describe "Depayloader when processing data" do
-    test "passes through packets with type 0..9 and 16..21 (RBSP types)" do
+    test "passes through packets with type 0..47 (RBSP types)" do
       data = RBSPNaluFactory.sample_nalu()
       buffer = %Buffer{payload: data}
 
@@ -43,6 +44,30 @@ defmodule Membrane.RTP.H265.DepayloaderTest do
       assert data == <<1::32, FUFactory.glued_fixtures()::binary>>
     end
 
+    test "parses FU packets with donl" do
+      assert {actions, @don_state} =
+               FUFactory.get_all_fixtures()
+               |> then(&[FUFactory.add_donl_field(hd(&1), 1_000) | tl(&1)])
+               |> Enum.map(&FUFactory.precede_with_fu_nal_header/1)
+               ~> (enum -> Enum.zip(enum, 1..Enum.count(enum)))
+               |> Enum.map(fn {elem, seq_num} ->
+                 %Buffer{payload: elem, metadata: %{rtp: %{sequence_number: seq_num}}}
+               end)
+               |> Enum.reduce(@don_state, fn buffer, prev_state ->
+                 Depayloader.handle_process(:input, buffer, nil, prev_state)
+                 ~> (
+                   {[], %Depayloader.State{} = state} -> state
+                   {actions, state} -> {actions, state}
+                 )
+               end)
+
+      assert {:output, %Buffer{payload: data, metadata: metadata}} =
+               Keyword.fetch!(actions, :buffer)
+
+      assert data == <<1::32, FUFactory.glued_fixtures()::binary>>
+      assert metadata.decoding_order_number == 1_000
+    end
+
     test "parses AP packets" do
       data = APFactory.sample_data()
 
@@ -57,6 +82,26 @@ defmodule Membrane.RTP.H265.DepayloaderTest do
       |> Enum.each(fn {result, original_data} ->
         assert %Buffer{payload: result_data} = result
         assert <<1::32, ^original_data::binary>> = result_data
+      end)
+    end
+
+    test "parses AP packets with donl and dond" do
+      data = APFactory.sample_data()
+      don = :rand.uniform(10_000)
+
+      buffer = %Buffer{payload: APFactory.into_ap_unit_with_don(data, don)}
+
+      assert {actions, _state} = Depayloader.handle_process(:input, buffer, nil, @don_state)
+
+      assert [buffer: {:output, buffers}] = actions
+
+      buffers
+      |> Enum.zip(data)
+      |> Enum.with_index(0)
+      |> Enum.each(fn {{result, original_data}, index} ->
+        assert %Buffer{payload: result_data, metadata: metadata} = result
+        assert <<1::32, ^original_data::binary>> = result_data
+        assert metadata.decoding_order_number == don + index
       end)
     end
   end

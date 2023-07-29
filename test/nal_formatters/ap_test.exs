@@ -14,8 +14,25 @@ defmodule Membrane.RTP.H265.APTest do
       test_data
       |> APFactory.binaries_into_ap()
       |> AP.parse()
-      ~> ({:ok, result} -> Enum.zip(result, test_data))
+      ~> ({:ok, result} -> result |> Enum.map(&elem(&1, 0)) |> Enum.zip(test_data))
       |> Enum.each(fn {a, b} -> assert a == b end)
+    end
+
+    test "properly decodes nal aggregate with donl and dond fields" do
+      test_data = APFactory.sample_data()
+      don = :rand.uniform(10_000)
+
+      test_data
+      |> APFactory.binaries_into_ap_with_don(don)
+      |> AP.parse(true)
+      ~> ({:ok, result} ->
+            result
+            |> Enum.with_index(fn {data, don}, index -> {index, data, don} end)
+            |> Enum.zip(test_data))
+      |> Enum.each(fn {{idx, parsed_data, expected_don}, expected_data} ->
+        assert don + idx == expected_don
+        assert parsed_data == expected_data
+      end)
     end
 
     test "returns error when packet is malformed" do

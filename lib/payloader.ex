@@ -28,8 +28,8 @@ defmodule Membrane.RTP.H265.Payloader do
                 description: """
                 In `:single_nalu` mode, payloader puts exactly one NAL unit
                 into each payload, altering only RTP metadata. `:non_interleaved`
-                mode handles also FU-A and STAP-A packetization. See
-                [RFC 6184](https://tools.ietf.org/html/rfc7798) for details.
+                mode handles also FU and AP packetization. See
+                [RFC 7798](https://tools.ietf.org/html/rfc7798) for details.
                 """
               ]
 

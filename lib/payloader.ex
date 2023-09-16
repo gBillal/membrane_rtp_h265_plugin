@@ -34,7 +34,7 @@ defmodule Membrane.RTP.H265.Payloader do
               ]
 
   def_input_pad :input,
-    accepted_format: %H265{alignment: :nalu},
+    accepted_format: %H265{alignment: :nalu, stream_structure: :annexb},
     demand_mode: :auto
 
   def_output_pad :output,

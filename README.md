@@ -24,7 +24,7 @@ The package can be installed by adding `membrane_rtp_h265_plugin` to your list o
 ```elixir
 def deps do
   [
-    {:membrane_rtp_h265_plugin, "~> 0.3.0"}
+    {:membrane_rtp_h265_plugin, "~> 0.4.0"}
   ]
 end
 ```

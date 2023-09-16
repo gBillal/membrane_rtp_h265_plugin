@@ -21,7 +21,7 @@ defmodule Membrane.RTP.H265.Depayloader do
   def_input_pad :input, accepted_format: RTP, demand_mode: :auto
 
   def_output_pad :output,
-    accepted_format: %H265.RemoteStream{alignment: :nalu},
+    accepted_format: %H265{alignment: :nalu, stream_structure: :annexb},
     demand_mode: :auto
 
   def_options sprop_max_don_diff: [
@@ -50,8 +50,7 @@ defmodule Membrane.RTP.H265.Depayloader do
 
   @impl true
   def handle_stream_format(:input, _stream_format, _context, state) do
-    stream_format = %H265.RemoteStream{alignment: :nalu}
-    {[stream_format: {:output, stream_format}], state}
+    {[stream_format: {:output, %H265{alignment: :nalu}}], state}
   end
 
   @impl true

@@ -17,7 +17,7 @@ defmodule Membrane.RTP.H265.DepayloaderTest do
       buffer = %Buffer{payload: data}
 
       assert {actions, @empty_state} =
-               Depayloader.handle_process(:input, buffer, nil, @empty_state)
+               Depayloader.handle_buffer(:input, buffer, nil, @empty_state)
 
       assert {:output, result} = Keyword.fetch!(actions, :buffer)
       assert %Buffer{payload: <<1::32, processed_data::binary>>} = result
@@ -33,7 +33,7 @@ defmodule Membrane.RTP.H265.DepayloaderTest do
                  %Buffer{payload: elem, metadata: %{rtp: %{sequence_number: seq_num}}}
                end)
                |> Enum.reduce(@empty_state, fn buffer, prev_state ->
-                 Depayloader.handle_process(:input, buffer, nil, prev_state)
+                 Depayloader.handle_buffer(:input, buffer, nil, prev_state)
                  ~> (
                    {[], %Depayloader.State{} = state} -> state
                    {actions, state} -> {actions, state}
@@ -54,7 +54,7 @@ defmodule Membrane.RTP.H265.DepayloaderTest do
                  %Buffer{payload: elem, metadata: %{rtp: %{sequence_number: seq_num}}}
                end)
                |> Enum.reduce(@don_state, fn buffer, prev_state ->
-                 Depayloader.handle_process(:input, buffer, nil, prev_state)
+                 Depayloader.handle_buffer(:input, buffer, nil, prev_state)
                  ~> (
                    {[], %Depayloader.State{} = state} -> state
                    {actions, state} -> {actions, state}
@@ -73,7 +73,7 @@ defmodule Membrane.RTP.H265.DepayloaderTest do
 
       buffer = %Buffer{payload: APFactory.into_ap_unit(data)}
 
-      assert {actions, _state} = Depayloader.handle_process(:input, buffer, nil, @empty_state)
+      assert {actions, _state} = Depayloader.handle_buffer(:input, buffer, nil, @empty_state)
 
       assert [buffer: {:output, buffers}] = actions
 
@@ -91,7 +91,7 @@ defmodule Membrane.RTP.H265.DepayloaderTest do
 
       buffer = %Buffer{payload: APFactory.into_ap_unit_with_don(data, don)}
 
-      assert {actions, _state} = Depayloader.handle_process(:input, buffer, nil, @don_state)
+      assert {actions, _state} = Depayloader.handle_buffer(:input, buffer, nil, @don_state)
 
       assert [buffer: {:output, buffers}] = actions
 
@@ -135,7 +135,7 @@ defmodule Membrane.RTP.H265.DepayloaderTest do
                      67, 149, 169, 61, 178, 147, 249, 138, 15, 81, 60, 59, 234, 117, 32, 55, 245,
                      115, 49, 165, 19, 87, 99, 15, 255, 51, 62, 243, 41, 9>>
                }
-               ~> Depayloader.handle_process(:input, &1, nil, %Depayloader.State{
+               ~> Depayloader.handle_buffer(:input, &1, nil, %Depayloader.State{
                  parser_acc: %FU{}
                })
     end
@@ -146,7 +146,7 @@ defmodule Membrane.RTP.H265.DepayloaderTest do
                  metadata: %{rtp: %{sequence_number: 2}},
                  payload: <<96, 1>> <> <<35_402::16, 0, 0, 0, 0, 0, 0, 1, 1, 2>>
                }
-               ~> Depayloader.handle_process(:input, &1, nil, @empty_state)
+               ~> Depayloader.handle_buffer(:input, &1, nil, @empty_state)
     end
 
     test "when parsing not valid nalu" do
@@ -155,7 +155,7 @@ defmodule Membrane.RTP.H265.DepayloaderTest do
                  metadata: %{rtp: %{sequence_number: 2}},
                  payload: <<128::8>>
                }
-               ~> Depayloader.handle_process(:input, &1, nil, @empty_state)
+               ~> Depayloader.handle_buffer(:input, &1, nil, @empty_state)
     end
   end
 end

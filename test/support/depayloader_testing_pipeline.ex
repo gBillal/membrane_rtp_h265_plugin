@@ -9,12 +9,12 @@ defmodule Membrane.Support.DepayloaderTestingPipeline do
 
   @spec start_pipeline(any()) :: pid()
   def start_pipeline(data) do
-    structure = [
+    spec = [
       child(:source, %Testing.Source{output: data, stream_format: %RTP{}})
       |> child(:depayloader, Depayloader)
       |> child(:sink, Testing.Sink)
     ]
 
-    Pipeline.start_link_supervised!(structure: structure)
+    Pipeline.start_link_supervised!(spec: spec)
   end
 end

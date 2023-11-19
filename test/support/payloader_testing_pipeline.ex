@@ -10,7 +10,7 @@ defmodule Membrane.Support.PayloaderTestingPipeline do
 
   @spec start_pipeline(any()) :: pid()
   def start_pipeline(data) do
-    structure = [
+    spec = [
       child(:source, %Testing.Source{
         output: data,
         stream_format: %H265{
@@ -26,6 +26,6 @@ defmodule Membrane.Support.PayloaderTestingPipeline do
       |> child(:sink, Testing.Sink)
     ]
 
-    Pipeline.start_link_supervised!(structure: structure)
+    Pipeline.start_link_supervised!(spec: spec)
   end
 end

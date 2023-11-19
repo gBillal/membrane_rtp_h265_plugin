@@ -18,11 +18,11 @@ defmodule Membrane.RTP.H265.Depayloader do
 
   @frame_prefix <<1::32>>
 
-  def_input_pad :input, accepted_format: RTP, demand_mode: :auto
+  def_input_pad :input, accepted_format: RTP, flow_control: :auto
 
   def_output_pad :output,
     accepted_format: %H265{alignment: :nalu, stream_structure: :annexb},
-    demand_mode: :auto
+    flow_control: :auto
 
   def_options sprop_max_don_diff: [
                 spec: 0..32_767,
@@ -54,13 +54,13 @@ defmodule Membrane.RTP.H265.Depayloader do
   end
 
   @impl true
-  def handle_process(:input, %Buffer{payload: ""}, _ctx, state) do
+  def handle_buffer(:input, %Buffer{payload: ""}, _ctx, state) do
     Membrane.Logger.debug("Received empty RTP packet. Ignoring")
     {[], state}
   end
 
   @impl true
-  def handle_process(:input, buffer, _ctx, state) do
+  def handle_buffer(:input, buffer, _ctx, state) do
     with {:ok, {header, _payload} = nal} <- NAL.Header.parse_unit_header(buffer.payload),
          unit_type = NAL.Header.decode_type(header),
          {:ok, {actions, state}} <- handle_unit_type(unit_type, nal, buffer, state) do

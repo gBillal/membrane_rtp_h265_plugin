@@ -1,7 +1,7 @@
 defmodule Membrane.RTP.H265.Mixfile do
   use Mix.Project
 
-  @version "0.5.1"
+  @version "0.5.2"
   @github_url "https://github.com/gBillal/membrane_rtp_h265_plugin"
 
   def project do
@@ -37,7 +37,7 @@ defmodule Membrane.RTP.H265.Mixfile do
   defp deps do
     [
       {:membrane_core, "~> 1.0"},
-      {:membrane_rtp_format, "~> 0.8.0"},
+      {:membrane_rtp_format, "~> 0.10.0"},
       {:membrane_h265_format, "~> 0.2.0"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:dialyxir, ">= 0.0.0", only: :dev, runtime: false},

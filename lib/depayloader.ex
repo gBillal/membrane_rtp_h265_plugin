@@ -18,7 +18,7 @@ defmodule Membrane.RTP.H265.Depayloader do
 
   @frame_prefix <<1::32>>
 
-  def_input_pad :input, accepted_format: RTP, flow_control: :auto
+  def_input_pad :input, accepted_format: %RTP{payload_format: format} when format in [nil, H265]
 
   def_output_pad :output,
     accepted_format: %H265{alignment: :nalu, stream_structure: :annexb},

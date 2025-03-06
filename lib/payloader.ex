@@ -39,7 +39,7 @@ defmodule Membrane.RTP.H265.Payloader do
 
   def_output_pad :output,
     flow_control: :auto,
-    accepted_format: RTP
+    accepted_format: %RTP{payload_format: H265}
 
   defmodule State do
     @moduledoc false
@@ -66,7 +66,7 @@ defmodule Membrane.RTP.H265.Payloader do
 
   @impl true
   def handle_playing(_ctx, state) do
-    {[stream_format: {:output, %RTP{}}], state}
+    {[stream_format: {:output, %RTP{payload_format: H265}}], state}
   end
 
   @impl true

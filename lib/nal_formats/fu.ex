@@ -43,43 +43,50 @@ defmodule Membrane.RTP.H265.FU do
   Serialize H265 unit into list of FU payloads
   """
   @spec serialize(binary(), pos_integer()) :: list(binary()) | {:error, :unit_too_small}
-  def serialize(data, preferred_size) do
-    case data do
-      <<header::2-binary, head::binary-size(preferred_size), rest::binary>> ->
-        <<r::1, type::6, layer_id::6, t_id::3>> = header
+  def serialize(<<header::2-binary, rest::binary>>, preferred_size) when byte_size(rest) >= 2 do
+    <<r::1, type::6, layer_id::6, t_id::3>> = header
 
-        payload =
-          head
-          |> FU.Header.add_header(1, 0, type)
-          |> NAL.Header.add_header(r, NAL.Header.encode_type(:fu), layer_id, t_id)
+    # An FU must consist of at least a start and an end fragment. The first
+    # chunk is capped at byte_size(rest) - 1 so a unit barely exceeding
+    # preferred_size still leaves data for the end fragment (upstream matched
+    # exactly preferred_size, so units of preferred_size + 3 bytes returned
+    # {:error, :unit_too_small} and units of preferred_size + 4 bytes emitted
+    # a start fragment with no end fragment).
+    chunk_size = min(preferred_size, byte_size(rest) - 1)
+    <<head::binary-size(chunk_size), rest::binary>> = rest
 
-        [payload | do_serialize(rest, r, type, layer_id, t_id, preferred_size)]
+    payload =
+      head
+      |> FU.Header.add_header(1, 0, type)
+      |> NAL.Header.add_header(r, NAL.Header.encode_type(:fu), layer_id, t_id)
 
-      _data ->
-        {:error, :unit_too_small}
-    end
+    [payload | do_serialize(rest, r, type, layer_id, t_id, preferred_size)]
   end
 
-  defp do_serialize(data, r, type, layer_id, t_id, preferred_size) do
-    case data do
-      <<head::binary-size(preferred_size), rest::binary>> ->
-        payload =
-          head
-          |> FU.Header.add_header(0, 0, type)
-          |> NAL.Header.add_header(r, NAL.Header.encode_type(:fu), layer_id, t_id)
+  def serialize(_data, _preferred_size), do: {:error, :unit_too_small}
 
-        [payload] ++ do_serialize(rest, r, type, layer_id, t_id, preferred_size)
+  # The strict inequality keeps a remainder that is an exact multiple of
+  # preferred_size from recursing into <<>> — the final chunk must always go
+  # through the end-fragment clause below (upstream emitted its last fragment
+  # with end_bit 0 in that case, so the receiver could never complete the FU).
+  defp do_serialize(data, r, type, layer_id, t_id, preferred_size)
+       when byte_size(data) > preferred_size do
+    <<head::binary-size(preferred_size), rest::binary>> = data
 
-      <<>> ->
-        []
+    payload =
+      head
+      |> FU.Header.add_header(0, 0, type)
+      |> NAL.Header.add_header(r, NAL.Header.encode_type(:fu), layer_id, t_id)
 
-      rest ->
-        [
-          rest
-          |> FU.Header.add_header(0, 1, type)
-          |> NAL.Header.add_header(r, NAL.Header.encode_type(:fu), layer_id, t_id)
-        ]
-    end
+    [payload | do_serialize(rest, r, type, layer_id, t_id, preferred_size)]
+  end
+
+  defp do_serialize(data, r, type, layer_id, t_id, _preferred_size) do
+    [
+      data
+      |> FU.Header.add_header(0, 1, type)
+      |> NAL.Header.add_header(r, NAL.Header.encode_type(:fu), layer_id, t_id)
+    ]
   end
 
   defp do_parse(header, data, seq_num, acc)

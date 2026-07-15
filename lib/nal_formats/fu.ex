@@ -65,10 +65,6 @@ defmodule Membrane.RTP.H265.FU do
 
   def serialize(_data, _preferred_size), do: {:error, :unit_too_small}
 
-  # The strict inequality keeps a remainder that is an exact multiple of
-  # preferred_size from recursing into <<>> — the final chunk must always go
-  # through the end-fragment clause below (upstream emitted its last fragment
-  # with end_bit 0 in that case, so the receiver could never complete the FU).
   defp do_serialize(data, r, type, layer_id, t_id, preferred_size)
        when byte_size(data) > preferred_size do
     <<head::binary-size(preferred_size), rest::binary>> = data

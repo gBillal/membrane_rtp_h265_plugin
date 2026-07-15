@@ -52,7 +52,6 @@ defmodule Membrane.RTP.H265.Payloader do
         pts: 0,
         dts: 0,
         metadata: nil,
-        end_access_unit: false,
         layer_id: 0,
         tid: 1,
         reserved: 0
@@ -121,9 +120,7 @@ defmodule Membrane.RTP.H265.Payloader do
         ap_acc
         | payloads: [buffer.payload | ap_acc.payloads],
           byte_size: size,
-          metadata: ap_acc.metadata || buffer.metadata,
-          end_access_unit:
-            ap_acc.end_access_unit or Map.get(buffer.metadata.h265, :end_access_unit, false),
+          metadata: buffer.metadata,
           pts: buffer.pts,
           dts: buffer.dts,
           reserved: max(ap_acc.reserved, r),
@@ -138,11 +135,6 @@ defmodule Membrane.RTP.H265.Payloader do
     end
   end
 
-  # The marker must come from the accumulated end_access_unit flag, not from
-  # `ap_acc.metadata` — that holds the FIRST aggregated NALU's metadata (e.g. a
-  # prefix SEI), so an AP that carries a whole small access unit (SEI + slice)
-  # would never get the marker and strict receivers (WebKit) never complete the
-  # frame.
   defp flush_stap_acc(%{ap_acc: ap_acc} = state) do
     buffers =
       case ap_acc.payloads do
@@ -168,7 +160,9 @@ defmodule Membrane.RTP.H265.Payloader do
       pts: ap_acc.pts,
       dts: ap_acc.dts
     }
-    |> Bunch.Struct.put_in([:metadata, :rtp], %{marker: ap_acc.end_access_unit})
+    |> Bunch.Struct.put_in([:metadata, :rtp], %{
+      marker: Map.get(ap_acc.metadata.h265, :end_access_unit, false)
+    })
   end
 
   defp try_single_nalu(buffer, state) do

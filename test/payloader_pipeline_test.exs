@@ -84,6 +84,35 @@ defmodule Membrane.RTP.H265.PayloaderPipelineTest do
       Membrane.Pipeline.terminate(pid)
     end
 
+    test "AP marker reflects the last aggregated NALU's end_access_unit, not the first's" do
+      number_of_packets = 3
+      single_size = div(@max_size - 2, number_of_packets) - 2
+      single_unit = <<0::size(single_size)-unit(8)>>
+
+      buffers =
+        1..number_of_packets
+        |> Enum.map(fn i ->
+          %Buffer{
+            payload: <<1::32>> <> single_unit,
+            metadata: %{timestamp: 0, h265: %{end_access_unit: i == number_of_packets}}
+          }
+        end)
+
+      pid =
+        buffers
+        |> Source.output_from_buffers()
+        |> PayloaderTestingPipeline.start_pipeline()
+
+      assert_sink_buffer(pid, :sink, %Buffer{payload: data, metadata: metadata})
+      assert metadata.rtp.marker == true
+      type = NAL.Header.encode_type(:ap)
+      assert <<0::1, ^type::6, 0::6, 0::3, rest::binary>> = data
+      assert {:ok, glued} = AP.parse(rest)
+      assert Enum.map(glued, &elem(&1, 0)) == List.duplicate(single_unit, number_of_packets)
+
+      Membrane.Pipeline.terminate(pid)
+    end
+
     test "payloads single NAL units" do
       number_of_packets = 16
 

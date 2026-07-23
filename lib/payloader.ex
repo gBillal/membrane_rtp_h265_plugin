@@ -120,7 +120,7 @@ defmodule Membrane.RTP.H265.Payloader do
         ap_acc
         | payloads: [buffer.payload | ap_acc.payloads],
           byte_size: size,
-          metadata: ap_acc.metadata || buffer.metadata,
+          metadata: buffer.metadata,
           pts: buffer.pts,
           dts: buffer.dts,
           reserved: max(ap_acc.reserved, r),
@@ -143,31 +143,26 @@ defmodule Membrane.RTP.H265.Payloader do
 
         [payload] ->
           # use single nalu
-          [
-            %Buffer{
-              payload: payload,
-              metadata: ap_acc.metadata,
-              pts: ap_acc.pts,
-              dts: ap_acc.dts
-            }
-            |> set_marker()
-          ]
+          [ap_buffer(payload, ap_acc)]
 
         payloads ->
           payload = AP.serialize(payloads, ap_acc.reserved, ap_acc.layer_id, ap_acc.tid)
-
-          [
-            %Buffer{
-              payload: payload,
-              metadata: ap_acc.metadata,
-              pts: ap_acc.pts,
-              dts: ap_acc.dts
-            }
-            |> set_marker()
-          ]
+          [ap_buffer(payload, ap_acc)]
       end
 
     {buffers, %{state | ap_acc: %State{}.ap_acc}}
+  end
+
+  defp ap_buffer(payload, ap_acc) do
+    %Buffer{
+      payload: payload,
+      metadata: ap_acc.metadata,
+      pts: ap_acc.pts,
+      dts: ap_acc.dts
+    }
+    |> Bunch.Struct.put_in([:metadata, :rtp], %{
+      marker: Map.get(ap_acc.metadata.h265, :end_access_unit, false)
+    })
   end
 
   defp try_single_nalu(buffer, state) do

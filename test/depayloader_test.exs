@@ -116,13 +116,6 @@ defmodule Membrane.RTP.H265.DepayloaderTest do
 
       assert actions == [forward: %Discontinuity{}]
     end
-
-    test "passes through rest of events" do
-      assert {actions, @empty_state} =
-               Depayloader.handle_event(:input, %Discontinuity{}, nil, @empty_state)
-
-      assert actions == [forward: %Discontinuity{}]
-    end
   end
 
   describe "Depayloader resets internal state in case of error and redemands" do

@@ -1,14 +1,14 @@
 defmodule Membrane.RTP.H265.Mixfile do
   use Mix.Project
 
-  @version "0.5.3"
+  @version "0.5.4"
   @github_url "https://github.com/gBillal/membrane_rtp_h265_plugin"
 
   def project do
     [
       app: :membrane_rtp_h265_plugin,
       version: @version,
-      elixir: "~> 1.13",
+      elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),

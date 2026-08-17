@@ -173,7 +173,7 @@ defmodule Membrane.RTP.H265.Payloader do
     end
   end
 
-  defp use_fu(buffer, state) do
+  defp use_fu(%Buffer{} = buffer, state) do
     buffer.payload
     |> FU.serialize(state.max_payload_size)
     |> Enum.map(&%Buffer{buffer | payload: &1})

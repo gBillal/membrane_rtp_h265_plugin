@@ -33,7 +33,7 @@ defmodule Membrane.RTP.H265.PayloaderPipelineTest do
         assert tid == 1
         assert NAL.Header.encode_type(:fu) == fu_type
         assert real_type == 1
-        first..last = data_base
+        first..last//1 = data_base
 
         cond do
           i == first ->

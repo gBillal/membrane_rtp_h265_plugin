@@ -87,10 +87,21 @@ defmodule Membrane.RTP.H265.FU do
 
   defp do_parse(header, data, seq_num, acc)
 
-  defp do_parse(%FU.Header{start_bit: true, type: type}, data, seq_num, %{donl?: false} = acc),
-    do: {:incomplete, %__MODULE__{acc | data: [data], last_seq_num: seq_num, type: type}}
+  defp do_parse(
+         %FU.Header{start_bit: true, type: type},
+         data,
+         seq_num,
+         %__MODULE__{donl?: false} = acc
+       ) do
+    {:incomplete, %__MODULE__{acc | data: [data], last_seq_num: seq_num, type: type}}
+  end
 
-  defp do_parse(%FU.Header{start_bit: true, type: type}, <<don::16, data::binary>>, seq_num, acc) do
+  defp do_parse(
+         %FU.Header{start_bit: true, type: type},
+         <<don::16, data::binary>>,
+         seq_num,
+         %__MODULE__{} = acc
+       ) do
     {:incomplete, %__MODULE__{acc | data: [data], last_seq_num: seq_num, type: type, don: don}}
   end
 

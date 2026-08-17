@@ -60,7 +60,7 @@ defmodule Membrane.RTP.H265.Depayloader do
   end
 
   @impl true
-  def handle_buffer(:input, buffer, _ctx, state) do
+  def handle_buffer(:input, buffer, _ctx, %State{} = state) do
     with {:ok, {header, _payload} = nal} <- NAL.Header.parse_unit_header(buffer.payload),
          unit_type = NAL.Header.decode_type(header),
          {:ok, {actions, state}} <- handle_unit_type(unit_type, nal, buffer, state) do
@@ -79,7 +79,7 @@ defmodule Membrane.RTP.H265.Depayloader do
   @impl true
   def handle_event(pad, event, context, state), do: super(pad, event, context, state)
 
-  defp handle_unit_type(:single_nalu, _nalu, buffer, state) do
+  defp handle_unit_type(:single_nalu, _nalu, %Buffer{} = buffer, state) do
     {don, buffer} =
       if state.sprop_max_don_diff > 0 do
         <<don::16, payload::binary>> = buffer.payload
@@ -92,7 +92,7 @@ defmodule Membrane.RTP.H265.Depayloader do
     {:ok, result}
   end
 
-  defp handle_unit_type(:fu, {header, data}, buffer, state) do
+  defp handle_unit_type(:fu, {header, data}, buffer, %State{} = state) do
     %Buffer{metadata: %{rtp: %{sequence_number: seq_num}}} = buffer
 
     case FU.parse(data, seq_num, map_state_to_fu(state)) do
@@ -112,7 +112,7 @@ defmodule Membrane.RTP.H265.Depayloader do
     end
   end
 
-  defp handle_unit_type(:ap, {_header, data}, buffer, state) do
+  defp handle_unit_type(:ap, {_header, data}, %Buffer{} = buffer, state) do
     with {:ok, nalus} <- AP.parse(data, state.sprop_max_don_diff > 0) do
       buffers =
         Enum.map(nalus, fn {nalu, don} ->
@@ -129,11 +129,11 @@ defmodule Membrane.RTP.H265.Depayloader do
     {action_from_data(data, buffer, don), state}
   end
 
-  defp action_from_data(data, buffer, nil) do
+  defp action_from_data(data, %Buffer{} = buffer, nil) do
     [buffer: {:output, %Buffer{buffer | payload: add_prefix(data)}}]
   end
 
-  defp action_from_data(data, buffer, don) do
+  defp action_from_data(data, %Buffer{} = buffer, don) do
     metadata = Map.put(buffer.metadata, :decoding_order_number, don)
     [buffer: {:output, %Buffer{buffer | payload: add_prefix(data), metadata: metadata}}]
   end
